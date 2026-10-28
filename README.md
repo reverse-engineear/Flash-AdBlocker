@@ -28,6 +28,7 @@ Each extension folder is independent: its own `manifest.json`, scripts, rules, i
 1. Create `extensions/<name>/` with a `manifest.json` at its top level and all paths inside it relative to that folder.
 2. Add `extensions/<name>/README.md` describing what it does and how it was verified.
 3. Add a row to the table above.
+4. Releases are tagged `v<version>` for the whole repository, so keep each extension's version distinct, or move to `<name>-v<version>` tags once two extensions would collide.
 
 ## Publish
 
@@ -47,4 +48,4 @@ Get that `.pem` from the Chrome Web Store developer dashboard using *Download pr
 
 Note that stable Chrome refuses to install a `.crx` from outside the Web Store unless it is forced with `--load-extension` or pushed by enterprise policy, so the ZIP is the file you upload to the store and the `.crx` is only for controlled or offline deployment.
 
-Every successful build on `main` also attaches its ZIP and `.crx` to a rolling prerelease tagged `edge` ([current release assets](/reverse-engineear/Flash-AdBlocker/releases/tag/edge)), replaced on each push.
+Every successful build on `main` also publishes a GitHub Release tagged with the version read from that extension's `manifest.json` — `v2.2.0` today. Bump `version` in the manifest and the next push cuts a new tag; rebuilding the same version replaces that release's assets instead of adding a duplicate.
