@@ -74,31 +74,6 @@ jobs:
           (cd "dist/$SLUG" && zip -rq -X "$out" .)
           unzip -l "$out" | tail -1
 
-      - name: Build signed .crx
-        env:
-          CRX_KEYS_JSON: ${{ secrets.CRX_KEYS_JSON }}
-        run: |
-          set -euo pipefail
-          pem=$(node -e 'const m=JSON.parse(process.env.CRX_KEYS_JSON||"{}");process.stdout.write(m[process.argv[1]]||"")' "$SLUG")
-          if [ -z "$pem" ]; then
-            echo "::notice::no CRX_KEYS_JSON entry for $SLUG — ZIP only. Add base64 of the .pem to ship a .crx."
-            exit 0
-          fi
-          key="$RUNNER_TEMP/$SLUG.pem"
-          printf "%s" "$pem" | base64 -d > "$key"
-          chmod 600 "$key"
-          chrome=$(command -v google-chrome-stable || command -v google-chrome || true)
-          if [ -z "$chrome" ]; then
-            echo "::error::runner has no Chrome binary to pack the .crx"
-            exit 1
-          fi
-          # Packing exits non-zero under some runner images unless it gets a display.
-          # --user-data-dir keeps this a standalone process instead of handing the flags to a running browser.
-          pack="$chrome --user-data-dir=$RUNNER_TEMP/crx-profile --pack-extension=$PWD/dist/$SLUG --pack-extension-key=$key"
-          $pack || xvfb-run -a $pack
-          test -f "dist/$SLUG.crx"
-          mv "dist/$SLUG.crx" "artifacts/$SLUG-v$version.crx"
-
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.slug }}-v${{ env.version }}
@@ -112,7 +87,7 @@ jobs:
           TAG: v${{ env.version }}
         run: |
           set -euo pipefail
-          notes="$SLUG v$version, built from $GITHUB_SHA. Upload the ZIP to the Chrome Web Store; the .crx is for controlled or offline deployment only, since stable Chrome refuses off-store .crx installs."
+          notes="$SLUG v$version, built from $GITHUB_SHA. Upload this ZIP to the Chrome Web Store from the developer dashboard."
           if gh release view "$TAG" >/dev/null 2>&1; then
             # Same version rebuilt: replace its assets rather than cut a second tag.
             echo "release $TAG already exists, refreshing its assets"

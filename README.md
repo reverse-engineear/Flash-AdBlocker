@@ -36,26 +36,8 @@ Zip the contents of a single extension folder (so `manifest.json` is at the zip 
 
 ## Builds
 
-[`build.yml`](.github/workflows/build.yml) finds every folder under `extensions/` that has a `manifest.json`, validates it with [`tools/validate.mjs`](tools/validate.mjs), and uploads two kinds of artifacts per extension: a store-ready ZIP with Chrome's `_metadata/` stripped out, and a signed `.crx`.
+[`build.yml`](.github/workflows/build.yml) finds every folder under `extensions/` that has a `manifest.json`, validates it with [`tools/validate.mjs`](tools/validate.mjs), and uploads a store-ready ZIP per extension with Chrome's `_metadata/` stripped out.
 
-The `.crx` needs the extension's private key, which is what fixes its extension ID. Store it as a repository secret named `CRX_KEYS_JSON`, a JSON object mapping folder name to the base64 of the `.pem`:
-
-```json
-{ "flash-adblocker": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCg==" }
-```
-
-[`tools/set-crx-secret.py`](tools/set-crx-secret.py) does that encoding and upload for you, so the key never gets pasted anywhere:
-
-```bash
-python -m pip install requests cryptography pynacl
-python tools/set-crx-secret.py --add flash-adblocker /path/to/key.pem
-python tools/set-crx-secret.py --list
-```
-
-It prints the extension ID each key implies, mirrors the keys to `~/.crx-keys/<owner>__<repo>.json` (GitHub never returns a secret's value, so that file is how you add a second extension without losing the first), and pushes the merged JSON with `--push`. Keep a backup of that file and of every `.pem`.
-
-Get that `.pem` from the Chrome Web Store developer dashboard using *Download private key and create public registration key*, or produce one yourself with `--pack-extension` and keep it. A build with no key entry for that folder skips the `.crx` and says so — a randomly keyed `.crx` would carry a different extension ID on every run, so it is better absent.
-
-Note that stable Chrome refuses to install a `.crx` from outside the Web Store unless it is forced with `--load-extension` or pushed by enterprise policy, so the ZIP is the file you upload to the store and the `.crx` is only for controlled or offline deployment.
+The ZIP is the only published package: it is what the Chrome Web Store accepts, and stable Chrome refuses to install a `.crx` from outside the store anyway.
 
 Every successful build on `main` also publishes a GitHub Release tagged with the version read from that extension's `manifest.json` — `v2.2.0` today. Bump `version` in the manifest and the next push cuts a new tag; rebuilding the same version replaces that release's assets instead of adding a duplicate.
