@@ -1,0 +1,102 @@
+name: Build extensions
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "extensions/**"
+      - "tools/**"
+      - ".github/workflows/build.yml"
+  pull_request:
+    paths:
+      - "extensions/**"
+      - "tools/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    outputs:
+      slugs: ${{ steps.scan.outputs.slugs }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: scan
+        run: |
+          set -euo pipefail
+          slugs=()
+          for dir in extensions/*/; do
+            [ -f "$dir/manifest.json" ] || continue
+            slugs+=("$(basename "$dir")")
+          done
+          if [ ${#slugs[@]} -eq 0 ]; then
+            echo "::error::no extension folder with a manifest.json under extensions/"
+            exit 1
+          fi
+          echo "found: ${slugs[*]}"
+          node -e 'console.log(JSON.stringify(process.argv.slice(1)))' "${slugs[@]}" > slugs.json
+          echo "slugs=$(cat slugs.json)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: discover
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        slug: ${{ fromJson(needs.discover.outputs.slugs) }}
+    env:
+      SLUG: ${{ matrix.slug }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate
+        run: node tools/validate.mjs "extensions/$SLUG"
+
+      - name: Stage package
+        run: |
+          set -euo pipefail
+          # _metadata is written by Chrome when the unpacked folder is loaded; it must not ship.
+          rm -rf dist "artifacts/$SLUG"
+          mkdir -p "dist/$SLUG" artifacts
+          rsync -a --exclude "_metadata/" "extensions/$SLUG/" "dist/$SLUG/"
+          echo "version=$(node -p "require('./dist/$SLUG/manifest.json').version")" >> "$GITHUB_ENV"
+
+      - name: Build store ZIP
+        run: |
+          set -euo pipefail
+          (cd "dist/$SLUG" && zip -rq -X "../../../artifacts/$SLUG-v$version.zip" .)
+
+      - name: Build signed .crx
+        env:
+          CRX_KEYS_JSON: ${{ secrets.CRX_KEYS_JSON }}
+        run: |
+          set -euo pipefail
+          pem=$(node -e 'const m=JSON.parse(process.env.CRX_KEYS_JSON||"{}");process.stdout.write(m[process.argv[1]]||"")' "$SLUG")
+          if [ -z "$pem" ]; then
+            echo "::notice::no CRX_KEYS_JSON entry for $SLUG — ZIP only. Add base64 of the .pem to ship a .crx."
+            exit 0
+          fi
+          key="$RUNNER_TEMP/$SLUG.pem"
+          printf "%s" "$pem" | base64 -d > "$key"
+          chmod 600 "$key"
+          chrome=$(command -v google-chrome-stable || command -v google-chrome || true)
+          if [ -z "$chrome" ]; then
+            echo "::error::runner has no Chrome binary to pack the .crx"
+            exit 1
+          fi
+          # Packing exits non-zero under some runner images unless it gets a display.
+          "$chrome" --pack-extension="$PWD/dist/$SLUG" --pack-extension-key="$key" \
+            || xvfb-run -a "$chrome" --pack-extension="$PWD/dist/$SLUG" --pack-extension-key="$key"
+          mv "dist/$SLUG.crx" "artifacts/$SLUG-v$version.crx"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.slug }}-v${{ env.version }}
+          path: artifacts/
+          if-no-files-found: error
