@@ -40,6 +40,8 @@ jobs:
   build:
     needs: discover
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -102,3 +104,17 @@ jobs:
           name: ${{ matrix.slug }}-v${{ env.version }}
           path: artifacts/
           if-no-files-found: error
+
+      - name: Publish to the rolling release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag=edge
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" \
+            --prerelease --target "$GITHUB_SHA" \
+            --title "Latest build" \
+            --notes "Auto-published from every push to main. Upload the ZIP to the Chrome Web Store; the .crx is for controlled or offline deployment only, since stable Chrome refuses off-store .crx installs."
+          ls -l artifacts
+          gh release upload "$tag" artifacts/* --clobber

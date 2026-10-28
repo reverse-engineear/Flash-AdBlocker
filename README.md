@@ -46,3 +46,5 @@ The `.crx` needs the extension's private key, which is what fixes its extension 
 Get that `.pem` from the Chrome Web Store developer dashboard using *Download private key and create public registration key*, or produce one yourself with `--pack-extension` and keep it. A build with no key entry for that folder skips the `.crx` and says so — a randomly keyed `.crx` would carry a different extension ID on every run, so it is better absent.
 
 Note that stable Chrome refuses to install a `.crx` from outside the Web Store unless it is forced with `--load-extension` or pushed by enterprise policy, so the ZIP is the file you upload to the store and the `.crx` is only for controlled or offline deployment.
+
+Every successful build on `main` also attaches its ZIP and `.crx` to a rolling prerelease tagged `edge` ([current release assets](/reverse-engineear/Flash-AdBlocker/releases/tag/edge)), replaced on each push.
