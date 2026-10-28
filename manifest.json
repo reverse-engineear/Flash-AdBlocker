@@ -1,0 +1,53 @@
+{
+  "manifest_version": 3,
+  "name": "Flash AdBlocker",
+  "version": "2.2.0",
+  "description": "Blocks ads and trackers across 200,000+ domains with per-site controls and cosmetic filtering.",
+  "minimum_chrome_version": "121",
+  "permissions": [
+    "storage",
+    "tabs",
+    "scripting",
+    "webNavigation",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ads",
+        "enabled": true,
+        "path": "rules/ads.json"
+      },
+      {
+        "id": "exceptions",
+        "enabled": true,
+        "path": "rules/exceptions.json"
+      }
+    ]
+  },
+  "action": {
+    "default_title": "Flash AdBlocker",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "options_page": "options.html"
+}

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Flash AdBlocker Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div class="logo">F</div>
+      <div><h1>Flash AdBlocker Settings</h1><p>Protection preferences and filter sources</p></div>
+    </header>
+
+    <section class="panel">
+      <h2>Protection</h2>
+      <p>Network rules and cosmetic filtering are applied automatically. Pause everything here or from the toolbar popup.</p>
+      <label class="check"><input type="checkbox" id="enabled"> Enable ad and tracker blocking</label>
+      <label class="check"><input type="checkbox" id="cosmeticEnabled"> Hide common ad containers (cosmetic filtering)</label>
+    </section>
+
+    <section class="panel">
+      <h2>Custom blocked domains</h2>
+      <p>One domain per line. Every request to these domains is blocked. Use this for sites missing from the bundled rules.</p>
+      <textarea id="customDomains" rows="7" spellcheck="false" placeholder="ads.example.com&#10;tracker.example.net"></textarea>
+      <p class="hint">Accepts plain domains, <code>||domain^</code> filters, and hosts-file lines. Up to 4,500 domains.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Supplemental filter list</h2>
+      <p>The bundled rules cover 200,000+ ad and tracker domains offline. This optional download adds domains that are not in the bundled list. Safe for hosts files and <code>||domain^</code> lists.</p>
+      <label for="filterUrl">Filter URL</label>
+      <input id="filterUrl" type="url" spellcheck="false">
+      <div class="actions">
+        <button id="saveBtn">Save settings</button>
+        <button id="updateBtn" class="secondary">Download &amp; update</button>
+      </div>
+      <p id="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel">
+      <h2>Active protection</h2>
+      <div id="stats" class="stats-list"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Important limitations</h2>
+      <ul>
+        <li>Network rules cover 200,000+ ad and tracker domains plus site-scoped paths. They cannot run full uBlock Origin scriptlets or procedural cosmetic filters.</li>
+        <li>Cosmetic selectors can occasionally hide a legitimate element. Turn cosmetic filtering off if a site misbehaves.</li>
+        <li>Filter lists are remote content when downloaded. Only use a source you trust.</li>
+        <li>Browser-internal pages, the Chrome Web Store, and other extensions cannot be modified.</li>
+        <li>A block rule can break site functionality. Use the per-site allowlist from the popup.</li>
+      </ul>
+    </section>
+  </main>
+  <script src="options.js"></script>
+</body>
+</html>

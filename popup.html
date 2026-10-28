@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Flash AdBlocker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="app">
+    <header class="brand">
+      <div class="logo">F</div>
+      <div><h1>Flash AdBlocker</h1><p>Ad &amp; tracker protection</p></div>
+      <button id="settingsBtn" class="icon-btn" title="Settings" aria-label="Settings">⚙</button>
+    </header>
+
+    <section class="hero">
+      <div class="shield" id="shieldIcon">✓</div>
+      <div class="hero-copy">
+        <strong id="statusTitle">Protection active</strong>
+        <span id="siteText">Checking current site…</span>
+      </div>
+      <label class="switch" aria-label="Enable protection">
+        <input type="checkbox" id="enabledToggle">
+        <span class="slider"></span>
+      </label>
+    </section>
+
+    <section class="stats">
+      <div class="stat-card">
+        <span class="stat-icon">✦</span>
+        <strong id="blockedCount">—</strong>
+        <span>Blocked on this page</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">▦</span>
+        <strong id="filterCount">—</strong>
+        <span>Ad/tracker domains</span>
+      </div>
+    </section>
+
+    <button id="siteToggle" class="site-button">Allow ads on this site</button>
+    <label class="cosmetic-row">
+      <span><strong>Hide ad spaces</strong><small>Cosmetic filtering</small></span>
+      <label class="switch small">
+        <input type="checkbox" id="cosmeticToggle">
+        <span class="slider"></span>
+      </label>
+    </label>
+
+    <footer>
+      <span id="updateStatus">Bundled rules loading…</span>
+      <button id="updateBtn" class="text-btn">Update filters</button>
+    </footer>
+    <p id="message" role="status" aria-live="polite"></p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

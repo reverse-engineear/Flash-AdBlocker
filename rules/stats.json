@@ -1,0 +1,23 @@
+{
+  "generated": "2026-10-22",
+  "bundledVersion": "2026-10-23.1",
+  "staticAds": 7040,
+  "staticExceptions": 1354,
+  "staticTotal": 8394,
+  "dynamicBundled": 0,
+  "broadBlockRules": 255,
+  "broadBlockDomains": 209087,
+  "blockDomains": 214029,
+  "bundledDomains": 214029,
+  "allowDomains": 254,
+  "sources": [
+    "EasyList/EasyPrivacy 2026-10-22",
+    "AdGuard DNS filter 2026-10-22",
+    "AdGuard Mobile ads 2026-10-22",
+    "AdGuard Tracking 2026-10-22",
+    "Peter Lowe ad servers 2026-10-22"
+  ],
+  "cosmeticSelectors": 13588,
+  "cosmeticDomains": 7536,
+  "cosmeticSiteSelectors": 15663
+}
