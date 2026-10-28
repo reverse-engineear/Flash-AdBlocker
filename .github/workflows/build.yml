@@ -70,7 +70,9 @@ jobs:
       - name: Build store ZIP
         run: |
           set -euo pipefail
-          (cd "dist/$SLUG" && zip -rq -X "../../../artifacts/$SLUG-v$version.zip" .)
+          out="$GITHUB_WORKSPACE/artifacts/$SLUG-v$version.zip"
+          (cd "dist/$SLUG" && zip -rq -X "$out" .)
+          unzip -l "$out" | tail -1
 
       - name: Build signed .crx
         env:
