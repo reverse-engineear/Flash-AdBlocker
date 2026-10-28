@@ -1,0 +1,7 @@
+node_modules/
+dist/
+build/
+*.zip
+*.crx
+.DS_Store
+Thumbs.db
