@@ -3,18 +3,16 @@ name: Build extensions
 on:
   push:
     branches: [main]
-    paths:
-      - "extensions/**"
-      - "tools/**"
-      - ".github/workflows/build.yml"
   pull_request:
-    paths:
-      - "extensions/**"
-      - "tools/**"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+# Every push builds, but a newer push to the same branch replaces the run in progress.
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   discover:
