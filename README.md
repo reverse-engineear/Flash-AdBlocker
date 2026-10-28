@@ -44,6 +44,16 @@ The `.crx` needs the extension's private key, which is what fixes its extension 
 { "flash-adblocker": "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCg==" }
 ```
 
+[`tools/set-crx-secret.py`](tools/set-crx-secret.py) does that encoding and upload for you, so the key never gets pasted anywhere:
+
+```bash
+python -m pip install requests cryptography pynacl
+python tools/set-crx-secret.py --add flash-adblocker /path/to/key.pem
+python tools/set-crx-secret.py --list
+```
+
+It prints the extension ID each key implies, mirrors the keys to `~/.crx-keys/<owner>__<repo>.json` (GitHub never returns a secret's value, so that file is how you add a second extension without losing the first), and pushes the merged JSON with `--push`. Keep a backup of that file and of every `.pem`.
+
 Get that `.pem` from the Chrome Web Store developer dashboard using *Download private key and create public registration key*, or produce one yourself with `--pack-extension` and keep it. A build with no key entry for that folder skips the `.crx` and says so — a randomly keyed `.crx` would carry a different extension ID on every run, so it is better absent.
 
 Note that stable Chrome refuses to install a `.crx` from outside the Web Store unless it is forced with `--load-extension` or pushed by enterprise policy, so the ZIP is the file you upload to the store and the `.crx` is only for controlled or offline deployment.
